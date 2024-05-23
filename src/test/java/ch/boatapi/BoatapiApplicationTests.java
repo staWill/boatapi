@@ -14,12 +14,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.stream.Stream;
 
 import static org.springframework.test.util.AssertionErrors.*;
 
-@SpringBootTest(classes = BoatapiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = {BoatapiApplication.class, TestSecurityConfig.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 class BoatapiApplicationTests {
 
     @Autowired
@@ -51,6 +53,7 @@ class BoatapiApplicationTests {
         ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/api/v1/boats",
                 HttpMethod.GET, entity, String.class);
 
+        assertEquals("should be 200", 200, response.getStatusCode().value());
         assertNotNull("response should not be null", response.getBody());
     }
 
@@ -67,7 +70,7 @@ class BoatapiApplicationTests {
 
         ResponseEntity<BoatDto> response = restTemplate.postForEntity(getRootUrl() + "/api/v1/boats", boatDto, BoatDto.class);
         assertNotNull("should not be null",response.getBody());
-        assertEquals("should be 200", 200, response.getStatusCode());
+        assertEquals("should be 200", 200, response.getStatusCode().value());
     }
 
     @ParameterizedTest
