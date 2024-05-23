@@ -39,4 +39,19 @@ public class BoatController {
         Boat boat = mapper.map(boatDto, Boat.class);
         return this.boatRepository.save(boat);
     }
+
+    @PutMapping("/boats/{id}")
+    public Boat updateBoatById(@Valid @RequestBody BoatDto boatDto, @PathVariable(value = "id") UUID boatId) throws ResourceNotFoundException {
+        if (boatRepository.existsById(boatId)) {
+            Boat boat = mapper.map(boatDto, Boat.class);
+            boat.setId(boatId);
+            return this.boatRepository.save(boat);
+        }
+        throw new ResourceNotFoundException("Boat not found with id: " + boatId);
+    }
+
+    @DeleteMapping("/boats/{id}")
+    public void deleteBoatById(@PathVariable(value = "id") UUID boatId) {
+        this.boatRepository.deleteById(boatId);
+    }
 }

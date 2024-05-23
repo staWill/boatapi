@@ -17,8 +17,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.stream.Stream;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.*;
 
 @SpringBootTest(classes = BoatapiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoatapiApplicationTests {
@@ -68,14 +67,37 @@ class BoatapiApplicationTests {
 
         ResponseEntity<BoatDto> response = restTemplate.postForEntity(getRootUrl() + "/api/v1/boats", boatDto, BoatDto.class);
         assertNotNull("should not be null",response.getBody());
-        assertEquals("could be 200", 200, response.getStatusCode());
+        assertEquals("should be 200", 200, response.getStatusCode());
     }
 
     @ParameterizedTest
     @MethodSource("boatProvider")
     public void testCreateBoatValidation(BoatDto boatDto){
         ResponseEntity<BoatDto> response = restTemplate.postForEntity(getRootUrl() + "/api/v1/boats", boatDto, BoatDto.class);
-        assertEquals("could be 400", 400, response.getStatusCode().value());
+        assertEquals("should be 400", 400, response.getStatusCode().value());
+    }
+
+    @Test
+    public void testDeleteBoat(){
+        Boat boat = restTemplate.getForObject("/api/v1/boats/19ba0988-2173-418f-b88e-d0fad90d0cef", Boat.class);
+        assertNotNull("should not be null", boat);
+        restTemplate.delete(getRootUrl() + "/api/v1/boats/19ba0988-2173-418f-b88e-d0fad90d0cef");
+        boat = restTemplate.getForObject("/api/v1/boats/19ba0988-2173-418f-b88e-d0fad90d0cef", Boat.class);
+        assertNull("should be null", boat.getName());
+    }
+
+    @Test
+    public void testUpdateBoat(){
+        Boat boat = restTemplate.getForObject("/api/v1/boats/29ba0988-2173-418f-b88e-d0fad90d0cef", Boat.class);
+        assertNotNull("should not be null", boat);
+
+        BoatDto boatDto = new BoatDto("name", "description");
+        restTemplate.put("/api/v1/boats/29ba0988-2173-418f-b88e-d0fad90d0cef", boatDto);
+
+        Boat acutalBoat = restTemplate.getForObject("/api/v1/boats/29ba0988-2173-418f-b88e-d0fad90d0cef", Boat.class);
+
+        assertEquals("name should be equals", boatDto.getName(), acutalBoat.getName());
+        assertEquals("description should be equals", boatDto.getDescription(), acutalBoat.getDescription());
     }
 
 
